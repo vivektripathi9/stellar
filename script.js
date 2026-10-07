@@ -2,6 +2,8 @@
 (function () {
   'use strict';
 
+  document.documentElement.classList.add('js');
+
   /* Nav: solid background after the hero, mobile menu toggle */
   var nav = document.getElementById('nav');
   var toggle = document.getElementById('navToggle');
@@ -180,15 +182,87 @@
     });
   });
 
-  /* Reveal sections once, quietly */
-  var targets = document.querySelectorAll('.intro__grid, .homefeat__grid, .additions .wrap, .amenities--lead .wrap, .amenities--gallery .wrap, .plans .wrap, .location .wrap, .specs .wrap, .life .wrap');
-  if ('IntersectionObserver' in window) {
-    targets.forEach(function (t) { t.classList.add('reveal'); });
+  /* Smooth scroll reveals for each section */
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function markReveal(el, extra) {
+    if (!el) return;
+    el.classList.add('reveal');
+    if (extra) el.classList.add(extra);
+  }
+
+  /* Section shells */
+  [
+    '.overview .wrap',
+    '.intro .wrap',
+    '.homefeat .wrap',
+    '.specs .wrap',
+    '.plans .wrap',
+    '.location .wrap',
+    '.amenities--lead .wrap',
+    '.amenities--gallery .wrap',
+    '.additions .wrap',
+    '.life .wrap',
+    '.about .wrap',
+    '.stats .wrap',
+    '.vm .wrap',
+    '.contact .wrap',
+    '.blog .wrap',
+    '.article .wrap',
+    '.pagehero .wrap',
+    '.footer__grid'
+  ].forEach(function (sel) {
+    document.querySelectorAll(sel).forEach(function (el) { markReveal(el); });
+  });
+
+  /* Directional pieces */
+  document.querySelectorAll('.intro__text, .homefeat__list, .life__text, .about__text, .vm__text').forEach(function (el) {
+    markReveal(el, 'reveal--left');
+  });
+  document.querySelectorAll('.intro__figure, .homefeat__figure, .about__figure, .vm__media, .master__figure').forEach(function (el) {
+    markReveal(el, 'reveal--right');
+  });
+  document.querySelectorAll('.life__pair, .life__row, .life__stage, .master__legend, .location__map').forEach(function (el) {
+    markReveal(el, 'reveal--scale');
+  });
+
+  /* Section heads */
+  document.querySelectorAll('.section-head, .intro__text').forEach(function (el) {
+    el.classList.add('reveal');
+  });
+
+  /* Staggered grids / lists */
+  [
+    '.overview__list',
+    '.amenities__overview',
+    '.additions__grid',
+    '.features',
+    '.strips',
+    '.future ul',
+    '.stats__list',
+    '.blog__grid',
+    '.life__pair',
+    '.scroller'
+  ].forEach(function (sel) {
+    document.querySelectorAll(sel).forEach(function (el) {
+      el.classList.add('reveal', 'reveal-stagger');
+    });
+  });
+
+  var targets = document.querySelectorAll('.reveal');
+  if (reduceMotion) {
+    targets.forEach(function (t) { t.classList.add('is-in'); });
+  } else if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
+        if (en.isIntersecting) {
+          en.target.classList.add('is-in');
+          io.unobserve(en.target);
+        }
       });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
     targets.forEach(function (t) { io.observe(t); });
+  } else {
+    targets.forEach(function (t) { t.classList.add('is-in'); });
   }
 })();
