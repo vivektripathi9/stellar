@@ -158,7 +158,7 @@
   window.openEnquiry = openEnquiry;
 
   /* Show enquiry popup on every page load / refresh */
-  setTimeout(function () { openEnquiry(); }, 600);
+  if (!/nomodal/.test(location.search)) setTimeout(function () { openEnquiry(); }, 600);
 
   /* Enquiry forms (popup + footer + contact) — client-side check, then hand off (swap the fetch for your endpoint) */
   document.querySelectorAll('form.form').forEach(function (form) {
@@ -182,6 +182,29 @@
     });
   });
 
+  /* Location: category tabs */
+  var locPanel = document.getElementById('locationPanel');
+  if (locPanel) {
+    var tabs = locPanel.querySelectorAll('[data-loc-tab]');
+    var panes = locPanel.querySelectorAll('[data-loc-pane]');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var id = tab.getAttribute('data-loc-tab');
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        panes.forEach(function (pane) {
+          var on = pane.getAttribute('data-loc-pane') === id;
+          pane.classList.toggle('is-active', on);
+          if (on) pane.removeAttribute('hidden');
+          else pane.setAttribute('hidden', '');
+        });
+      });
+    });
+  }
+
   /* Smooth scroll reveals for each section */
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -198,7 +221,6 @@
     '.homefeat .wrap',
     '.specs .wrap',
     '.plans .wrap',
-    '.location .wrap',
     '.amenities--lead .wrap',
     '.amenities--gallery .wrap',
     '.additions .wrap',
@@ -215,6 +237,15 @@
     document.querySelectorAll(sel).forEach(function (el) { markReveal(el); });
   });
 
+  /* Location section: animate as a whole + pieces */
+  document.querySelectorAll('.location').forEach(function (el) { markReveal(el); });
+  document.querySelectorAll('.location__head').forEach(function (el) { markReveal(el, 'reveal--left'); });
+  document.querySelectorAll('.location__map').forEach(function (el) { markReveal(el, 'reveal--scale'); });
+  document.querySelectorAll('.location__panel').forEach(function (el) { markReveal(el, 'reveal--right'); });
+  document.querySelectorAll('.corridor').forEach(function (el) {
+    el.classList.add('reveal', 'reveal-stagger');
+  });
+
   /* Directional pieces */
   document.querySelectorAll('.intro__text, .homefeat__list, .life__text, .about__text, .vm__text').forEach(function (el) {
     markReveal(el, 'reveal--left');
@@ -222,7 +253,7 @@
   document.querySelectorAll('.intro__figure, .homefeat__figure, .about__figure, .vm__media, .master__figure').forEach(function (el) {
     markReveal(el, 'reveal--right');
   });
-  document.querySelectorAll('.life__pair, .life__row, .life__stage, .master__legend, .location__map').forEach(function (el) {
+  document.querySelectorAll('.life__pair, .life__row, .life__stage').forEach(function (el) {
     markReveal(el, 'reveal--scale');
   });
 
@@ -233,12 +264,11 @@
 
   /* Staggered grids / lists */
   [
-    '.overview__list',
-    '.amenities__overview',
+    '.overview__facts',
+    '.amenities-lead__modes',
     '.additions__grid',
     '.features',
     '.strips',
-    '.future ul',
     '.stats__list',
     '.blog__grid',
     '.life__pair',
